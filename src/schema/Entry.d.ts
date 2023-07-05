@@ -8,4 +8,6 @@ interface Entry {
 interface DailyUpdate {
 	mood?: string;
 	moodDescription?: string;
+	counter?: number;
+	completed?: boolean;
 }

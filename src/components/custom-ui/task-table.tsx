@@ -25,6 +25,7 @@ export default function TaskTable() {
 			<Table>
 				<TableHeader>
 					<TableRow>
+						<TableHead className="w-[50px]"></TableHead>
 						<TableHead className="font-bold">Task</TableHead>
 						<TableHead className="w-[50px]">Expand</TableHead>
 					</TableRow>

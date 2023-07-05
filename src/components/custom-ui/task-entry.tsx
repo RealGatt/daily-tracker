@@ -1,28 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
-import { determineArticle } from "@/lib/anOrA";
 import useLocalStorage from "@/lib/localStorage";
-import { convertToPastTense } from "@/lib/pasttenser";
+import { getDaysOfWeek } from "@/lib/thisWeek";
 import { Mood } from "@/schema/Mood";
 import { Transition } from "@headlessui/react";
 import {
 	LucideArrowDownFromLine,
+	LucideArrowUp10,
 	LucideCalendar,
+	LucideCalendarDays,
 	LucideCircle,
 	LucideCircleDashed,
+	LucideCircleDollarSign,
+	LucideHeartHandshake,
 } from "lucide-react";
-import { JSX, useEffect, useMemo, useState } from "react";
-import { Label } from "../ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "../ui/select";
+import { useState } from "react";
 import { TableCell, TableRow } from "../ui/table";
-import { getDaysOfWeek } from "@/lib/thisWeek";
+import MoodTaskEntry from "./entry-types/mood-task-entry";
+import DailyTaskEntry from "./entry-types/daily-task-entry";
 
 // method to convert a date into a normalised string
 const dateToNormalisedString = (date: Date) => date.toISOString().split("T")[0];
@@ -35,7 +30,7 @@ const getToday = () => {
 };
 
 export default function TaskEntry({ entry }: { entry: Entry }) {
-	const [entryMoods, setEntryMoods] = useLocalStorage<{
+	const [taskEntries, setTaskEntries] = useLocalStorage<{
 		[key: string]: DailyUpdate;
 	}>(`dailyupdates:${entry.uuid}`, {});
 
@@ -43,63 +38,52 @@ export default function TaskEntry({ entry }: { entry: Entry }) {
 	const [date, setDate] = useState<Date>(getToday());
 	const [previousDate, setPreviousDate] = useState<Date>(getToday());
 	const [calendarOpen, setCalendarOpen] = useState(true);
-	const [mood, setMood] = useState("...");
-	const [moodNote, setMoodNote] = useState("");
-	const stringDateCache = useMemo(() => dateToNormalisedString(date), [date]);
-	const moods: JSX.Element[] = [];
-	Mood.forEach((mood) => {
-		moods.push(<SelectItem value={mood.mood}>{mood.mood}</SelectItem>);
-	});
-
-	useEffect(() => {
-		const dateStr = dateToNormalisedString(date);
-		setEntryMoods({
-			...entryMoods,
-			[dateStr]: {
-				mood: mood,
-				moodDescription: moodNote,
-			},
-		});
-		console.log(`Saved mood for mood:${entry.uuid}-${dateStr}`, mood);
-	}, [mood, moodNote]);
-
-	useEffect(() => {
-		console.log("Date changed", previousDate, date);
-		const previousDateStr = dateToNormalisedString(
-			previousDate ?? new Date()
-		);
-		setEntryMoods({
-			...entryMoods,
-			[previousDateStr]: {
-				mood: mood,
-				moodDescription: moodNote,
-			},
-		});
-
-		const dateStr = dateToNormalisedString(date);
-		const newMood = entryMoods[dateStr]?.mood ?? "...";
-		setMood(newMood);
-		setMoodNote(entryMoods[dateStr]?.moodDescription ?? "");
-		console.log(`Loaded mood for mood:${entry.uuid}-${dateStr}`, newMood);
-	}, [date]);
-
-	useEffect(() => {
-		const dateStr = dateToNormalisedString(date);
-		const newMood = entryMoods[dateStr]?.mood ?? "...";
-		setMood(newMood);
-		setMoodNote(entryMoods[dateStr]?.moodDescription ?? "");
-		console.log(
-			`LOADED PAGE - Loaded mood for mood:${entry.uuid}-${dateStr}`,
-			newMood
-		);
-	}, []);
-
-	console.log(entryMoods, stringDateCache);
-
 	if (typeof window === "undefined") return <></>;
+
+	let taskEntry = <div>Unknown Task Type... {entry.entryType}</div>;
+	if (entry.entryType === "mood") {
+		taskEntry = (
+			<MoodTaskEntry
+				entry={entry}
+				date={date}
+				previousDate={previousDate}
+				taskEntries={taskEntries}
+				setTaskEntries={(e: any) => {
+					console.log(e);
+					setTaskEntries(e);
+				}}
+			/>
+		);
+	}
+	if (entry.entryType === "daily") {
+		taskEntry = (
+			<DailyTaskEntry
+				entry={entry}
+				date={date}
+				previousDate={previousDate}
+				taskEntries={taskEntries}
+				setTaskEntries={(e: any) => {
+					console.log(e);
+					setTaskEntries(e);
+				}}
+			/>
+		);
+	}
+
+	let taskIcon = <LucideCircleDollarSign />;
+	if (entry.entryType === "mood") {
+		taskIcon = <LucideHeartHandshake />;
+	}
+	if (entry.entryType === "daily") {
+		taskIcon = <LucideCalendarDays />;
+	}
+	if (entry.entryType === "counter") {
+		taskIcon = <LucideArrowUp10 />;
+	}
 	return (
 		<>
 			<TableRow>
+				<TableCell className="w-[50px] pl-5">{taskIcon}</TableCell>
 				<TableCell className="font-bold">
 					<div>{entry.title}</div>
 					<div className="text-xs font-normal">
@@ -109,24 +93,78 @@ export default function TaskEntry({ entry }: { entry: Entry }) {
 						{getDaysOfWeek().map((day) => {
 							const dayStr = dateToNormalisedString(day);
 							// get the mood for that day
-							const mood = entryMoods[dayStr]?.mood ?? "...";
-							const moodObj = Mood.find((m) => m.mood === mood);
-							if (mood === "...") {
-								return (
-									<span key={`${entry.uuid}-${dayStr}`}>
-										<LucideCircleDashed />
-									</span>
-								);
+							const dailyTaskEntry = taskEntries[dayStr] ?? {
+								mood: undefined,
+								completed: false,
+								counter: 0,
+							};
+							switch (entry.entryType) {
+								case "mood":
+									const moodObj = Mood.find(
+										(m) => m.mood === dailyTaskEntry.mood
+									);
+									if (
+										!dailyTaskEntry.mood ||
+										dailyTaskEntry.mood === "..."
+									) {
+										return (
+											<span
+												key={`${entry.uuid}-${dayStr}`}
+											>
+												<LucideCircleDashed />
+											</span>
+										);
+									}
+									return (
+										<span key={`${entry.uuid}-${dayStr}`}>
+											<LucideCircle
+												style={{
+													fill: moodObj?.color,
+												}}
+											/>
+										</span>
+									);
+								case "daily":
+									if (!dailyTaskEntry.completed)
+										return (
+											<span
+												key={`${entry.uuid}-${dayStr}`}
+											>
+												<LucideCircleDashed />
+											</span>
+										);
+									return (
+										<span key={`${entry.uuid}-${dayStr}`}>
+											<LucideCircle
+												style={{
+													fill: "green",
+												}}
+											/>
+										</span>
+									);
+								case "counter":
+									if (
+										!dailyTaskEntry.counter ||
+										dailyTaskEntry.counter > 0
+									)
+										return (
+											<span
+												key={`${entry.uuid}-${dayStr}`}
+											>
+												<LucideCircleDashed />
+											</span>
+										);
+									return (
+										<span key={`${entry.uuid}-${dayStr}`}>
+											<LucideCircle
+												style={{
+													fill: "green",
+												}}
+											/>
+										</span>
+									);
 							}
-							return (
-								<span key={`${entry.uuid}-${dayStr}`}>
-									<LucideCircle
-										style={{
-											fill: moodObj?.color,
-										}}
-									/>
-								</span>
-							);
+							return <></>;
 						})}
 					</div>
 				</TableCell>
@@ -192,6 +230,7 @@ export default function TaskEntry({ entry }: { entry: Entry }) {
 					</Transition>
 					<Transition
 						show={open && !calendarOpen}
+						unmount={false}
 						enter="transition-all ease-in-out duration-500 delay-[200ms]"
 						enterFrom="opacity-0"
 						enterTo="opacity-100"
@@ -200,7 +239,7 @@ export default function TaskEntry({ entry }: { entry: Entry }) {
 						leaveTo="opacity-0"
 					>
 						<div className="absolute">
-							<div>
+							<div id="taskSpecific">
 								<Button
 									className="absolute left-[-5%] md:!left-0 top-2 z-2"
 									onClick={() => {
@@ -209,65 +248,9 @@ export default function TaskEntry({ entry }: { entry: Entry }) {
 								>
 									<LucideCalendar />
 								</Button>
+
 								<div className="flex flex-col py-6 pl-12 pr-8">
-									<span className="py-6 ">
-										<h3 className="underline font-bold text-lg">
-											{date.toLocaleDateString("en-US", {
-												weekday: "long",
-												year: "numeric",
-												month: "long",
-												day: "numeric",
-											})}
-										</h3>
-										<h3 className="text-base">
-											A{determineArticle(mood)}{" "}
-											{mood != "Other"
-												? convertToPastTense(mood)
-												: "Interesting"}{" "}
-											task today...
-										</h3>
-									</span>
-									<div className="flex flex-col gap-4">
-										<div>
-											<Label>
-												What was your mood during this
-												task today?
-											</Label>
-											<Select
-												onValueChange={setMood}
-												value={mood}
-											>
-												<SelectTrigger className="w-full">
-													<SelectValue placeholder="Mood" />
-												</SelectTrigger>
-												<SelectContent className="w-full max-h-60">
-													{moods}
-												</SelectContent>
-											</Select>
-											<Transition
-												show={mood === "Other"}
-												enter="transition-all ease-in-out duration-500 delay-[200ms]"
-												enterFrom="opacity-0"
-												enterTo="opacity-100"
-												leave="transition-all ease-in-out duration-500 delay-[200ms]"
-												leaveFrom="opacity-100"
-												leaveTo="opacity-0"
-											>
-												<Label>
-													{"Let's"} be more
-													specific...
-												</Label>
-												<Input
-													value={moodNote}
-													onChange={(e) => {
-														setMoodNote(
-															e.target.value
-														);
-													}}
-												/>
-											</Transition>
-										</div>
-									</div>
+									{taskEntry}
 								</div>
 							</div>
 						</div>

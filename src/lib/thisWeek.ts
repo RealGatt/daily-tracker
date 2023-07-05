@@ -4,13 +4,13 @@ export function getDaysOfWeek(): Date[] {
 	const days = [];
 
 	// Calculate the date of Monday in the current week
-	const monday = new Date(today);
-	monday.setDate(today.getDate() - (currentDay - 1));
+	const sunday = new Date(today);
+	sunday.setDate(today.getDate() - currentDay);
 
 	// Push the dates of the week into the 'days' array
 	for (let i = 0; i < 7; i++) {
-		const day = new Date(monday);
-		day.setDate(monday.getDate() + i);
+		const day = new Date(sunday);
+		day.setDate(sunday.getDate() + i);
 		day.setHours(0, 0, 0, 0);
 		days.push(day);
 	}

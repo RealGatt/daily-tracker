@@ -1,18 +1,17 @@
 import { Input } from "@/components/ui/input";
 import { determineArticle } from "@/lib/anOrA";
-import useLocalStorage from "@/lib/localStorage";
 import { convertToPastTense } from "@/lib/pasttenser";
 import { Mood } from "@/schema/Mood";
 import { Transition } from "@headlessui/react";
 import { JSX, useEffect, useMemo, useState } from "react";
-import { Label } from "../ui/label";
+import { Label } from "@/components/ui/label";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "../ui/select";
+} from "@/components/ui/select";
 
 // method to convert a date into a normalised string
 const dateToNormalisedString = (date: Date) => date.toISOString().split("T")[0];
@@ -33,8 +32,8 @@ export default function MoodTaskEntry({
 	// method to take in the new entries
 	setTaskEntries: (dailyEntries: { [key: string]: DailyUpdate }) => void;
 }) {
-	const [mood, setMood] = useState("...");
-	const [moodNote, setMoodNote] = useState("");
+	const [mood, setMood] = useState<string>();
+	const [moodNote, setMoodNote] = useState<string>();
 	const stringDateCache = useMemo(() => dateToNormalisedString(date), [date]);
 	const moods: JSX.Element[] = [];
 	Mood.forEach((mood) => {
@@ -85,59 +84,60 @@ export default function MoodTaskEntry({
 	}, []);
 
 	console.log(taskEntries, stringDateCache);
-
-	if (typeof window === "undefined") return <></>;
 	return (
 		<>
-			<div className="flex flex-col py-6 pl-12 pr-8">
-				<span className="py-6 ">
-					<h3 className="underline font-bold text-lg">
-						{date.toLocaleDateString("en-US", {
-							weekday: "long",
-							year: "numeric",
-							month: "long",
-							day: "numeric",
-						})}
-					</h3>
-					<h3 className="text-base">
-						A{determineArticle(mood)}{" "}
-						{mood != "Other"
-							? convertToPastTense(mood)
-							: "Interesting"}{" "}
-						task today...
-					</h3>
-				</span>
-				<div className="flex flex-col gap-4">
-					<div>
-						<Label>
-							What was your mood during this task today?
-						</Label>
-						<Select onValueChange={setMood} value={mood}>
-							<SelectTrigger className="w-full">
-								<SelectValue placeholder="Mood" />
-							</SelectTrigger>
-							<SelectContent className="w-full max-h-60">
-								{moods}
-							</SelectContent>
-						</Select>
-						<Transition
-							show={mood === "Other"}
-							enter="transition-all ease-in-out duration-500 delay-[200ms]"
-							enterFrom="opacity-0"
-							enterTo="opacity-100"
-							leave="transition-all ease-in-out duration-500 delay-[200ms]"
-							leaveFrom="opacity-100"
-							leaveTo="opacity-0"
-						>
-							<Label>{"Let's"} be more specific...</Label>
-							<Input
-								value={moodNote}
-								onChange={(e) => {
-									setMoodNote(e.target.value);
-								}}
-							/>
-						</Transition>
-					</div>
+			<span className="py-6 ">
+				<h3 className="underline font-bold text-lg">
+					{date.toLocaleDateString("en-US", {
+						weekday: "long",
+						year: "numeric",
+						month: "long",
+						day: "numeric",
+					})}
+				</h3>
+				<h3 className="text-base">
+					A{determineArticle(mood ?? "...")}{" "}
+					{mood != "Other"
+						? convertToPastTense(mood ?? "...")
+						: "Interesting"}{" "}
+					task today...
+				</h3>
+			</span>
+			<div className="flex flex-col gap-4">
+				<div>
+					<Label>What was your mood during this task today?</Label>
+					<Select
+						onValueChange={setMood}
+						value={mood ?? taskEntries[stringDateCache]?.mood}
+					>
+						<SelectTrigger className="w-full">
+							<SelectValue placeholder="Mood" />
+						</SelectTrigger>
+						<SelectContent className="w-full max-h-60">
+							{moods}
+						</SelectContent>
+					</Select>
+					<Transition
+						show={mood === "Other"}
+						enter="transition-all ease-in-out duration-500 delay-[200ms]"
+						enterFrom="opacity-0"
+						enterTo="opacity-100"
+						leave="transition-all ease-in-out duration-500 delay-[200ms]"
+						leaveFrom="opacity-100"
+						leaveTo="opacity-0"
+					>
+						<Label>{"Let's"} be more specific...</Label>
+						<Input
+							value={
+								moodNote ??
+								taskEntries[stringDateCache]?.moodDescription ??
+								""
+							}
+							onChange={(e) => {
+								setMoodNote(e.target.value);
+							}}
+						/>
+					</Transition>
 				</div>
 			</div>
 		</>
