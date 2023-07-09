@@ -72,6 +72,7 @@ export default function CounterTaskEntry({
 				? !!(taskEntries[dateStr].completed as boolean)
 				: false
 		);
+		setCount(taskEntries[dateStr]?.counter ?? 0);
 		setNote(taskEntries[dateStr]?.moodDescription ?? "");
 	}, [date]);
 
