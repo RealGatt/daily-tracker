@@ -15,6 +15,19 @@ export default function Home() {
 					<TaskTable />
 				</div>
 			</main>
+			<footer>
+				<div className="w-full flex flex-col place-items-center self-center max-w-6xl">
+					<p className="text-center">
+						Developed with ❤️ by{" "}
+						<a
+							href="https://github.com/RealGatt/daily-tracker"
+							target="_blank"
+						>
+							Gatt
+						</a>
+					</p>
+				</div>
+			</footer>
 		</ThemeProvider>
 	);
 }
