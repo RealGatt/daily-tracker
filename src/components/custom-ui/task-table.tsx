@@ -25,7 +25,6 @@ export default function TaskTable() {
 			<Table>
 				<TableHeader>
 					<TableRow>
-						<TableHead className="w-[50px]"></TableHead>
 						<TableHead className="font-bold">Task</TableHead>
 						<TableHead className="w-[50px]">Expand</TableHead>
 					</TableRow>
@@ -35,7 +34,18 @@ export default function TaskTable() {
 						if (!entry.uuid) entry.uuid = uuidv4();
 						if (!entry.entryType) entry.entryType = "mood";
 						return (
-							<TaskEntry key={`entry-${index}`} entry={entry} />
+							<TaskEntry
+								key={`entry-${index}`}
+								entry={entry}
+								deleteRequest={(entry) => {
+									console.log(`deleted`, entry);
+									setEntries(
+										entries.filter(
+											(e) => e.uuid !== entry.uuid
+										)
+									);
+								}}
+							/>
 						);
 					})}
 				</TableBody>

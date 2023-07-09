@@ -12,6 +12,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import ConfettiExplosion from "react-confetti-explosion";
 
 // method to convert a date into a normalised string
 const dateToNormalisedString = (date: Date) => date.toISOString().split("T")[0];
@@ -21,11 +22,13 @@ export default function MoodTaskEntry({
 	date,
 	previousDate,
 	taskEntries,
+	isShown,
 	setTaskEntries,
 }: {
 	entry: Entry;
 	date: Date;
 	previousDate: Date;
+	isShown: boolean;
 	taskEntries: {
 		[key: string]: DailyUpdate;
 	};
@@ -39,6 +42,19 @@ export default function MoodTaskEntry({
 	Mood.forEach((mood) => {
 		moods.push(<SelectItem value={mood.mood}>{mood.mood}</SelectItem>);
 	});
+	const [showConfetti, setShowConfetti] = useState<boolean>(false);
+	useEffect(() => {
+		if (mood && mood != "..." && isShown) {
+			setShowConfetti(true);
+			setTimeout(() => {
+				setTimeout(() => {
+					setShowConfetti(false);
+				}, 2000);
+			}, 3000);
+		} else {
+			setShowConfetti(false);
+		}
+	}, [mood, isShown]);
 
 	useEffect(() => {
 		const dateStr = dateToNormalisedString(date);
@@ -53,7 +69,6 @@ export default function MoodTaskEntry({
 	}, [mood, moodNote]);
 
 	useEffect(() => {
-		console.log("Date changed", previousDate, date);
 		const previousDateStr = dateToNormalisedString(
 			previousDate ?? new Date()
 		);
@@ -83,7 +98,6 @@ export default function MoodTaskEntry({
 		);
 	}, []);
 
-	console.log(taskEntries, stringDateCache);
 	return (
 		<>
 			<span className="py-6 ">
@@ -117,6 +131,22 @@ export default function MoodTaskEntry({
 							{moods}
 						</SelectContent>
 					</Select>
+
+					{showConfetti && isShown && (
+						<ConfettiExplosion
+							particleCount={50}
+							particleSize={6}
+							colors={[
+								"#ff0000",
+								"#00ff00",
+								"#0000ff",
+								"#ffff00",
+								"#00ffff",
+								"#ff00ff",
+							]}
+							force={0.5}
+						/>
+					)}
 					<Transition
 						show={mood === "Other"}
 						enter="transition-all ease-in-out duration-500 delay-[200ms]"

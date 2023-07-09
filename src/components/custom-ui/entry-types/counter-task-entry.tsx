@@ -1,16 +1,15 @@
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Toggle } from "@/components/ui/toggle";
 import { Transition } from "@headlessui/react";
+import { LucideCheck, LucideMinus, LucidePlus, Undo } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ConfettiExplosion from "react-confetti-explosion";
 
 // method to convert a date into a normalised string
 const dateToNormalisedString = (date: Date) => date.toISOString().split("T")[0];
 
-export default function DailyTaskEntry({
+export default function CounterTaskEntry({
 	entry,
 	date,
 	previousDate,
@@ -24,11 +23,12 @@ export default function DailyTaskEntry({
 	taskEntries: {
 		[key: string]: DailyUpdate;
 	};
-	isShown: boolean;
 	// method to take in the new entries
 	setTaskEntries: (dailyEntries: { [key: string]: DailyUpdate }) => void;
+	isShown: boolean;
 }) {
 	const [completed, setCompleted] = useState<boolean>(false);
+	const [count, setCount] = useState<number>(0);
 	const [note, setNote] = useState<string>();
 	const stringDateCache = useMemo(() => dateToNormalisedString(date), [date]);
 
@@ -98,21 +98,56 @@ export default function DailyTaskEntry({
 			</span>
 			<div className="flex flex-col gap-4">
 				<div>
+					<Label htmlFor="completed">
+						How many times have you completed this today?
+					</Label>
 					<div className="flex items-center space-x-2">
-						<Label htmlFor="completed">
-							Did you complete this today?
-						</Label>
-						<Checkbox
+						<Input
+							type="number"
+							min={0}
+							value={count}
 							id="completed"
-							onCheckedChange={(checked) => {
-								setCompleted(checked as boolean);
+							onChange={(e) => {
+								setCount(Number(e.target.value));
 							}}
-							checked={
-								completed ??
-								taskEntries[stringDateCache]?.completed ??
-								false
-							}
 						/>
+						<Button
+							onClick={() => {
+								setCount(count + 1);
+							}}
+						>
+							<LucidePlus />
+						</Button>
+						<Button
+							disabled={count <= 0}
+							onClick={() => {
+								let newVal = count - 1;
+								if (newVal < 0) newVal = 0;
+								setCount(newVal);
+							}}
+						>
+							<LucideMinus />
+						</Button>
+					</div>
+
+					<div className="flex items-center space-x-2 mt-4">
+						<Button
+							className="flex-grow"
+							disabled={count <= 0}
+							onClick={() => {
+								setCompleted(!completed);
+							}}
+						>
+							{!completed ? (
+								<>
+									<LucideCheck /> All done!
+								</>
+							) : (
+								<>
+									<Undo /> Not done yet!
+								</>
+							)}
+						</Button>
 					</div>
 
 					{showConfetti && isShown && (

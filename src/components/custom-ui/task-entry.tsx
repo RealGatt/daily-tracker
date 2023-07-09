@@ -13,11 +13,22 @@ import {
 	LucideCircleDashed,
 	LucideCircleDollarSign,
 	LucideHeartHandshake,
+	LucideTrash2,
 } from "lucide-react";
 import { useState } from "react";
 import { TableCell, TableRow } from "../ui/table";
-import MoodTaskEntry from "./entry-types/mood-task-entry";
+import CounterTaskEntry from "./entry-types/counter-task-entry";
 import DailyTaskEntry from "./entry-types/daily-task-entry";
+import MoodTaskEntry from "./entry-types/mood-task-entry";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "../ui/dialog";
 
 // method to convert a date into a normalised string
 const dateToNormalisedString = (date: Date) => date.toISOString().split("T")[0];
@@ -29,7 +40,13 @@ const getToday = () => {
 	return today;
 };
 
-export default function TaskEntry({ entry }: { entry: Entry }) {
+export default function TaskEntry({
+	entry,
+	deleteRequest,
+}: {
+	entry: Entry;
+	deleteRequest: (entry: Entry) => void;
+}) {
 	const [taskEntries, setTaskEntries] = useLocalStorage<{
 		[key: string]: DailyUpdate;
 	}>(`dailyupdates:${entry.uuid}`, {});
@@ -48,17 +65,32 @@ export default function TaskEntry({ entry }: { entry: Entry }) {
 				date={date}
 				previousDate={previousDate}
 				taskEntries={taskEntries}
+				isShown={open && !calendarOpen}
 				setTaskEntries={(e: any) => {
 					console.log(e);
 					setTaskEntries(e);
 				}}
 			/>
 		);
-	}
-	if (entry.entryType === "daily") {
+	} else if (entry.entryType === "daily") {
 		taskEntry = (
 			<DailyTaskEntry
 				entry={entry}
+				date={date}
+				previousDate={previousDate}
+				taskEntries={taskEntries}
+				isShown={open && !calendarOpen}
+				setTaskEntries={(e: any) => {
+					console.log(e);
+					setTaskEntries(e);
+				}}
+			/>
+		);
+	} else if (entry.entryType === "counter") {
+		taskEntry = (
+			<CounterTaskEntry
+				entry={entry}
+				isShown={open && !calendarOpen}
 				date={date}
 				previousDate={previousDate}
 				taskEntries={taskEntries}
@@ -83,89 +115,95 @@ export default function TaskEntry({ entry }: { entry: Entry }) {
 	return (
 		<>
 			<TableRow>
-				<TableCell className="w-[50px] pl-5">{taskIcon}</TableCell>
 				<TableCell className="font-bold">
 					<div>{entry.title}</div>
 					<div className="text-xs font-normal">
 						{entry.description}
 					</div>
-					<div className="flex flex-row place-content-center gap-2">
-						{getDaysOfWeek().map((day) => {
-							const dayStr = dateToNormalisedString(day);
-							// get the mood for that day
-							const dailyTaskEntry = taskEntries[dayStr] ?? {
-								mood: undefined,
-								completed: false,
-								counter: 0,
-							};
-							switch (entry.entryType) {
-								case "mood":
-									const moodObj = Mood.find(
-										(m) => m.mood === dailyTaskEntry.mood
-									);
-									if (
-										!dailyTaskEntry.mood ||
-										dailyTaskEntry.mood === "..."
-									) {
+					<div className="flex flex-row">
+						<div className="">{taskIcon}</div>
+						<div className="flex-grow place-self-end flex flex-row place-content-center gap-2">
+							{getDaysOfWeek().map((day) => {
+								const dayStr = dateToNormalisedString(day);
+								// get the mood for that day
+								const dailyTaskEntry = taskEntries[dayStr] ?? {
+									mood: undefined,
+									completed: false,
+									counter: 0,
+								};
+								switch (entry.entryType) {
+									case "mood":
+										const moodObj = Mood.find(
+											(m) =>
+												m.mood === dailyTaskEntry.mood
+										);
+										if (
+											!dailyTaskEntry.mood ||
+											dailyTaskEntry.mood === "..."
+										) {
+											return (
+												<span
+													key={`${entry.uuid}-${dayStr}`}
+												>
+													<LucideCircleDashed />
+												</span>
+											);
+										}
 										return (
 											<span
 												key={`${entry.uuid}-${dayStr}`}
 											>
-												<LucideCircleDashed />
+												<LucideCircle
+													style={{
+														fill: moodObj?.color,
+													}}
+												/>
 											</span>
 										);
-									}
-									return (
-										<span key={`${entry.uuid}-${dayStr}`}>
-											<LucideCircle
-												style={{
-													fill: moodObj?.color,
-												}}
-											/>
-										</span>
-									);
-								case "daily":
-									if (!dailyTaskEntry.completed)
+									case "daily":
+										if (!dailyTaskEntry.completed)
+											return (
+												<span
+													key={`${entry.uuid}-${dayStr}`}
+												>
+													<LucideCircleDashed />
+												</span>
+											);
 										return (
 											<span
 												key={`${entry.uuid}-${dayStr}`}
 											>
-												<LucideCircleDashed />
+												<LucideCircle
+													style={{
+														fill: "green",
+													}}
+												/>
 											</span>
 										);
-									return (
-										<span key={`${entry.uuid}-${dayStr}`}>
-											<LucideCircle
-												style={{
-													fill: "green",
-												}}
-											/>
-										</span>
-									);
-								case "counter":
-									if (
-										!dailyTaskEntry.counter ||
-										dailyTaskEntry.counter > 0
-									)
+									case "counter":
+										if (!dailyTaskEntry.completed)
+											return (
+												<span
+													key={`${entry.uuid}-${dayStr}`}
+												>
+													<LucideCircleDashed />
+												</span>
+											);
 										return (
 											<span
 												key={`${entry.uuid}-${dayStr}`}
 											>
-												<LucideCircleDashed />
+												<LucideCircle
+													style={{
+														fill: "green",
+													}}
+												/>
 											</span>
 										);
-									return (
-										<span key={`${entry.uuid}-${dayStr}`}>
-											<LucideCircle
-												style={{
-													fill: "green",
-												}}
-											/>
-										</span>
-									);
-							}
-							return <></>;
-						})}
+								}
+								return <></>;
+							})}
+						</div>
 					</div>
 				</TableCell>
 				<TableCell className="w-[50px] pl-5">
@@ -184,7 +222,7 @@ export default function TaskEntry({ entry }: { entry: Entry }) {
 				</TableCell>
 			</TableRow>
 			<Transition
-				className={"min-h-[70vh] h-4/6"}
+				className={"min-h-[400px] h-4/6"}
 				show={open}
 				enter="transition-all ease-in-out duration-500 delay-[200ms]"
 				enterFrom="opacity-0"
@@ -193,69 +231,108 @@ export default function TaskEntry({ entry }: { entry: Entry }) {
 				leaveFrom="opacity-100"
 				leaveTo="opacity-0"
 			>
-				<div className="flex flex-row gap-4 min-h-full h-4/6">
-					<Transition
-						className="absolute z-5 bg-white"
-						show={open && calendarOpen}
-						enter="transition-all ease-in-out duration-500 delay-[200ms]"
-						enterFrom="translate-x-[-100%] z-5"
-						enterTo="translate-x-0 z-5"
-						leave="transition-all ease-in-out duration-300 z-5"
-						leaveFrom="translate-x-0 z-5"
-						leaveTo="translate-x-[-150%] z-5"
-					>
-						<div className="z-5 bg-background">
+				<Transition
+					className=""
+					show={open && calendarOpen}
+					enter="transition-all ease-in-out duration-500 delay-[200ms]"
+					enterFrom="translate-x-[-100%] z-5"
+					enterTo="translate-x-0 z-5"
+					leave="transition-all ease-in-out duration-500 z-5 "
+					leaveFrom="translate-x-0 z-5"
+					leaveTo="translate-x-[-150%] z-5"
+					unmount={false}
+				>
+					<div className="absolute z-5 ">
+						<Button
+							className="absolute z-5 right-[-25px] top-2"
+							onClick={() => {
+								setCalendarOpen(!calendarOpen);
+							}}
+						>
+							<LucideCalendar />
+						</Button>
+						<div className="flex flex-col py-6 px-4 ">
+							<Calendar
+								mode="single"
+								required
+								selected={date}
+								onSelect={(e) => {
+									console.log(`Selected`, e);
+									setCalendarOpen(false);
+									setPreviousDate(date);
+									setDate(e as Date);
+								}}
+								className="rounded-md border"
+							/>
+						</div>
+					</div>
+				</Transition>
+				<Transition
+					show={open && !calendarOpen}
+					unmount={false}
+					className={"flex flex-col gap-4 min-h-full h-4/6 w-full"}
+					enter="transition-all ease-in-out duration-500 delay-[200ms]"
+					enterFrom="opacity-0"
+					enterTo="opacity-100"
+					leave="transition-all ease-in-out duration-100"
+					leaveFrom="opacity-100"
+					leaveTo="opacity-0"
+				>
+					<div className="flex-grow">
+						<div className="relative">
 							<Button
-								className="absolute z-5 right-[-10px] top-2"
+								className="relative left-[-5%] md:!left-0 top-2 z-2"
 								onClick={() => {
 									setCalendarOpen(!calendarOpen);
 								}}
 							>
 								<LucideCalendar />
 							</Button>
-							<div className="flex flex-col py-6 px-4 ">
-								<Calendar
-									mode="single"
-									required
-									selected={date}
-									onSelect={(e) => {
-										console.log(`Selected`, e);
-										setPreviousDate(date);
-										setDate(e as Date);
-									}}
-									className="rounded-md border"
-								/>
-							</div>
-						</div>
-					</Transition>
-					<Transition
-						show={open && !calendarOpen}
-						unmount={false}
-						enter="transition-all ease-in-out duration-500 delay-[200ms]"
-						enterFrom="opacity-0"
-						enterTo="opacity-100"
-						leave="transition-all ease-in-out duration-100"
-						leaveFrom="opacity-100"
-						leaveTo="opacity-0"
-					>
-						<div className="absolute">
-							<div id="taskSpecific">
-								<Button
-									className="absolute left-[-5%] md:!left-0 top-2 z-2"
-									onClick={() => {
-										setCalendarOpen(!calendarOpen);
-									}}
-								>
-									<LucideCalendar />
-								</Button>
 
-								<div className="flex flex-col py-6 pl-12 pr-8">
-									{taskEntry}
-								</div>
-							</div>
+							<Dialog>
+								<DialogTrigger>
+									<Button className="absolute right-[-50px] top-2 z-2">
+										<LucideTrash2 />
+									</Button>
+								</DialogTrigger>
+								<DialogContent>
+									<DialogHeader>
+										<DialogTitle>Are you sure?</DialogTitle>
+										<DialogDescription>
+											Once you delete this task, it is not
+											recoverable
+										</DialogDescription>
+										<DialogFooter>
+											<DialogTrigger>
+												Cancel
+											</DialogTrigger>
+											<DialogTrigger
+												onClick={(e) => {
+													e.preventDefault();
+												}}
+											>
+												<Button
+													className="bg-red-500 hover:bg-red-600"
+													onClick={() => {
+														setIsOpen(false);
+														setCalendarOpen(false);
+														deleteRequest(entry);
+													}}
+												>
+													Delete
+												</Button>
+											</DialogTrigger>
+										</DialogFooter>
+									</DialogHeader>
+								</DialogContent>
+							</Dialog>
 						</div>
-					</Transition>
-				</div>
+
+						<div className="flex flex-col py-6 pl-12 pr-8">
+							{taskEntry}
+						</div>
+					</div>
+				</Transition>
 			</Transition>
 		</>
 	);
