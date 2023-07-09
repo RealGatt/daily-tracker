@@ -47,10 +47,11 @@ export default function CounterTaskEntry({
 			...taskEntries,
 			[dateStr]: {
 				completed: completed,
+				counter: count,
 				moodDescription: note,
 			},
 		});
-	}, [completed, note]);
+	}, [completed, note, count]);
 
 	useEffect(() => {
 		const previousDateStr = dateToNormalisedString(
