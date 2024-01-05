@@ -1,10 +1,15 @@
 "use server";
 
-import dynamic from "next/dynamic";
 import { Table, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import dynamic from "next/dynamic";
 
 export default async function Home({ params }: { params: { taskId: string } }) {
-	if (!params || !params.taskId) {
+	if (
+		!params ||
+		!params.taskId ||
+		params.taskId == "undefined" ||
+		params.taskId == "index"
+	) {
 		const TaskTableEntries = dynamic(
 			() => import("@/components/custom-ui/task-table-entries"),
 			{

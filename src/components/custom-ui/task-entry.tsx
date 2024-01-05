@@ -17,9 +17,6 @@ import DailyTaskEntry from "./entry-types/daily-task-entry";
 import MoodTaskEntry from "./entry-types/mood-task-entry";
 import TaskEntrySummaryWeek from "./task-entry-week-summary-dots";
 
-// method to convert a date into a normalised string
-const dateToNormalisedString = (date: Date) => date.toISOString().split("T")[0];
-
 // function to get today at midnight
 const getToday = () => {
 	const today = new Date();
