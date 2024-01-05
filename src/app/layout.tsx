@@ -1,7 +1,16 @@
 import Footer from "@/components/custom-ui/footer";
 import { FontContextProvider } from "@/components/font-selector";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Caveat, Inter, Play, Roboto, Sofia, Solway } from "next/font/google";
+import {
+	Caveat,
+	Inter,
+	Lobster,
+	Oswald,
+	Play,
+	Roboto,
+	Sofia,
+	Solway,
+} from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -14,6 +23,14 @@ const caveat = Caveat({
 	subsets: ["latin"],
 });
 const play = Play({
+	weight: "400",
+	subsets: ["latin"],
+});
+const oswald = Oswald({
+	weight: "400",
+	subsets: ["latin"],
+});
+const lobster = Lobster({
 	weight: "400",
 	subsets: ["latin"],
 });
@@ -63,6 +80,14 @@ export default async function RootLayout({
 						{
 							...play,
 							name: "Play",
+						},
+						{
+							...oswald,
+							name: "Oswald",
+						},
+						{
+							...lobster,
+							name: "Lobster",
 						},
 					]}
 				>
