@@ -24,7 +24,7 @@ export function FontContextProvider({
 	children: React.ReactNode;
 	fonts: FontWithName[];
 }) {
-	const [font, setFont] = useLocalStorage("font", "inter");
+	const [font, setFont] = useLocalStorage("font", "Inter");
 	useEffect(() => {
 		const useFont = fonts.find((checkFont) => checkFont.name === font);
 		console.log(`loading `, font, useFont);
@@ -44,13 +44,13 @@ export function FontContextProvider({
 }
 
 export default function FontSelector() {
-	const [font, setFont] = useLocalStorage("font", "inter");
+	const [font, setFont] = useLocalStorage("font", "Inter");
 	const fonts = useContext(FontContext);
 	return (
 		<Select
 			onValueChange={(e) => {
 				const font = fonts.find((font) => font.name === e);
-				setFont(font?.name ?? "inter");
+				setFont(font?.name ?? "Inter");
 			}}
 			value={font}
 		>
