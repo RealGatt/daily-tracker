@@ -6,6 +6,7 @@ import useLocalStorage from "use-local-storage";
 import { v4 as uuidv4 } from "uuid";
 import TaskEntry from "./task-entry";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function TaskEntryLoader(params: { taskId: string }) {
 	const router = useRouter();
@@ -31,9 +32,12 @@ export default function TaskEntryLoader(params: { taskId: string }) {
 	const task = entries.find((e) => e.uuid == params.taskId);
 	console.log(entries, task);
 	if (!task) {
+		toast.error("Task not found");
+		router.push("/");
 		return (
 			<div className="p-8 text-xl">
-				Task not found with ID {params.taskId}
+				Task not found with ID {params.taskId}. Redirecting you back
+				home now.
 			</div>
 		);
 	}

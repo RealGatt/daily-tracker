@@ -36,7 +36,6 @@ export default function TaskEntry({
 	}>(`dailyupdates:${entry.uuid}`, {});
 	const [date, setDate] = useState<Date>(getToday());
 	const [previousDate, setPreviousDate] = useState<Date>(getToday());
-	const [calendarOpen, setCalendarOpen] = useState(true);
 	if (typeof window === "undefined") return <></>;
 
 	let taskEntry = <div>Unknown Task Type... {entry.entryType}</div>;
@@ -47,7 +46,7 @@ export default function TaskEntry({
 				date={date}
 				previousDate={previousDate}
 				taskEntries={taskEntries}
-				isShown={!calendarOpen}
+				isShown={true}
 				setTaskEntries={(e: any) => {
 					console.log(e);
 					setTaskEntries(e);
@@ -61,7 +60,7 @@ export default function TaskEntry({
 				date={date}
 				previousDate={previousDate}
 				taskEntries={taskEntries}
-				isShown={!calendarOpen}
+				isShown={true}
 				setTaskEntries={(e: any) => {
 					console.log(e);
 					setTaskEntries(e);
@@ -72,7 +71,7 @@ export default function TaskEntry({
 		taskEntry = (
 			<CounterTaskEntry
 				entry={entry}
-				isShown={!calendarOpen}
+				isShown={true}
 				date={date}
 				previousDate={previousDate}
 				taskEntries={taskEntries}
@@ -100,7 +99,6 @@ export default function TaskEntry({
 	const completedDays = Object.entries(taskEntries).filter(
 		([key, value]) => value.completed
 	);
-	console.log(`completed`, completedDays);
 	return (
 		<div className="px-4 py-4 flex flex-col gap-4">
 			<div className="flex flex-row gap-2 place-content-evenly">
@@ -135,7 +133,6 @@ export default function TaskEntry({
 									<Button
 										className="bg-red-500 hover:bg-red-600"
 										onClick={() => {
-											setCalendarOpen(false);
 											deleteRequest(entry);
 										}}
 									>
@@ -158,14 +155,13 @@ export default function TaskEntry({
 					selected={date}
 					onSelect={(e: any) => {
 						console.log(`Selected`, e);
-						setCalendarOpen(false);
 						setPreviousDate(date);
 						setDate(e as Date);
 					}}
 					className="rounded-md border"
 					// give colours to each day based on the task entry (via react-day-picker)
 					modifiersStyles={{
-						completed: { color: "green" },
+						completed: { color: entry.completeColor ?? "green" },
 					}}
 					modifiers={{
 						completed: completedDays.map((e) => {

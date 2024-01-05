@@ -15,6 +15,8 @@ import {
 import NewTaskDialog from "./new-task-dialog";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import FontSelector from "../font-selector";
+import TaskDrawerControls from "../custom-ui/task-drawer-controls";
 
 export default function ControlDrawer() {
 	const pathname = usePathname();
@@ -32,15 +34,17 @@ export default function ControlDrawer() {
 			</DrawerTrigger>
 			<DrawerContent>
 				<div className="mx-auto w-full max-w-sm">
+					<TaskDrawerControls />
 					<DrawerHeader>
-						<DrawerTitle>Controls</DrawerTitle>
+						<DrawerTitle>Settings</DrawerTitle>
 					</DrawerHeader>
-					<div className="p-4 pb-0 flex flex-row gap-2">
+					<div className="flex flex-row gap-2">
 						<ThemeToggler />
-						<NewTaskDialog />
+						<FontSelector />
 					</div>
-					<DrawerFooter>
-						<DrawerClose asChild>
+					<DrawerFooter className="flex flex-row gap-2">
+						<NewTaskDialog />
+						<DrawerClose asChild className="w-[50%]">
 							<Button variant="outline">Close</Button>
 						</DrawerClose>
 					</DrawerFooter>

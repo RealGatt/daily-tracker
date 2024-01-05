@@ -3,6 +3,7 @@ interface Entry {
 	title: string;
 	description: string;
 	entryType: "daily" | "counter" | "mood";
+	completeColor?: string | null;
 }
 
 interface DailyUpdate {

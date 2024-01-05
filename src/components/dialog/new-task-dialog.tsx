@@ -50,7 +50,7 @@ export default function NewTaskDialog() {
 
 	return (
 		<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-			<DialogTrigger>
+			<DialogTrigger asChild className="w-[50%]">
 				<Button variant="outline">
 					<Icon
 						icon="mdi:plus-circle-outline"
