@@ -43,11 +43,11 @@ export default function CounterTaskEntry({
 
 	useEffect(() => {
 		const dateStr = dateToNormalisedString(date);
-		if (count == 0 && completed) setCompleted(false);
+		setCompleted(count == 0 ? false : completed);
 		setTaskEntries({
 			...taskEntries,
 			[dateStr]: {
-				completed: completed,
+				completed: count == 0 ? false : completed,
 				counter: count,
 				moodDescription: note,
 			},
@@ -61,7 +61,8 @@ export default function CounterTaskEntry({
 		setTaskEntries({
 			...taskEntries,
 			[previousDateStr]: {
-				completed: completed,
+				completed: count == 0 ? false : completed,
+				counter: count,
 				moodDescription: note,
 			},
 		});

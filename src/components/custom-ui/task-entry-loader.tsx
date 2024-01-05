@@ -43,7 +43,7 @@ export default function TaskEntryLoader(params: { taskId: string }) {
 	}
 
 	return (
-		<>
+		<div className="w-full">
 			<Link href="/">
 				<Table>
 					<TableRow>
@@ -65,6 +65,6 @@ export default function TaskEntryLoader(params: { taskId: string }) {
 					router.push("/");
 				}}
 			/>
-		</>
+		</div>
 	);
 }

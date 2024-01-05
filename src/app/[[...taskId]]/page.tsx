@@ -36,5 +36,9 @@ export default async function Home({ params }: { params: { taskId: string } }) {
 			ssr: false,
 		}
 	);
-	return <TaskEntryLoader taskId={params.taskId} />;
+	return (
+		<div className="w-full flex flex-col place-items-center self-center max-w-6xl">
+			<TaskEntryLoader taskId={params.taskId} />
+		</div>
+	);
 }
