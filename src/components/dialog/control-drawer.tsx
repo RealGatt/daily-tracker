@@ -33,14 +33,20 @@ export default function ControlDrawer() {
 				</Button>
 			</DrawerTrigger>
 			<DrawerContent>
-				<div className="mx-auto w-full max-w-sm">
+				<div className="mx-auto w-full max-w-sm px-2">
 					<TaskDrawerControls />
 					<DrawerHeader>
 						<DrawerTitle>Settings</DrawerTitle>
 					</DrawerHeader>
-					<div className="flex flex-row gap-2">
-						<ThemeToggler />
-						<FontSelector />
+					<div className="flex flex-row gap-2 flex-grow">
+						<div className="flex flex-col gap-1 flex-grow place-items-center">
+							Select Theme
+							<ThemeToggler />
+						</div>
+						<div className="flex flex-col gap-1 flex-grow place-items-center">
+							Select Font
+							<FontSelector />
+						</div>
 					</div>
 					<DrawerFooter className="flex flex-row gap-2">
 						<NewTaskDialog />

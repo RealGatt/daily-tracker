@@ -19,8 +19,8 @@ export default function TaskDrawerControls() {
 			<DrawerHeader>
 				<DrawerTitle>Task Settings</DrawerTitle>
 			</DrawerHeader>
-			<div className="flex flex-row gap-2">
-				<div className="flex flex-col gap-1">
+			<div className="flex flex-row gap-2 flex-grow">
+				<div className="flex flex-col gap-1 flex-grow place-items-center">
 					Completed Colour
 					<SelectColourButton
 						entry={entry}
