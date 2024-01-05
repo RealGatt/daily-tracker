@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 main {
-	min-height: 97vh;
+	min-height: 95vh;
 	display: flex;
 	flex-direction: column;
 }

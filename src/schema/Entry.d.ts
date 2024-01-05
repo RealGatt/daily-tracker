@@ -2,12 +2,12 @@ interface Entry {
 	uuid: string;
 	title: string;
 	description: string;
-	entryType: "mood" | "daily" | "counter";
+	entryType: "daily" | "counter" | "mood";
 }
 
 interface DailyUpdate {
-	mood?: string;
-	moodDescription?: string;
 	counter?: number;
 	completed?: boolean;
+	mood?: string;
+	moodDescription?: string;
 }

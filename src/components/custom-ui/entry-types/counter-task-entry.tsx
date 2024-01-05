@@ -43,6 +43,7 @@ export default function CounterTaskEntry({
 
 	useEffect(() => {
 		const dateStr = dateToNormalisedString(date);
+		if (count == 0 && completed) setCompleted(false);
 		setTaskEntries({
 			...taskEntries,
 			[dateStr]: {
