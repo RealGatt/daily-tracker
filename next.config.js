@@ -45,6 +45,10 @@ const securityHeaders = [
 		key: "X-Frame-Options",
 		value: "DENY",
 	},
+	{
+		key: "Content-Security-Policy",
+		value: "frame-ancestors 'self' https://gatt.space localhost:3000",
+	},
 	// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
 	{
 		key: "X-Content-Type-Options",
